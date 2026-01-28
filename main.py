@@ -7,6 +7,8 @@ import signal
 
 SAMPLE_RATE = 44100
 AMPLITUDE = 0.15
+BASE_FREQ = 200
+FREQ_STEP = 20
 
 active_freqs = set()
 lock = threading.Lock()
@@ -32,7 +34,7 @@ def on_press(key):
         if hasattr(key, "char") and key.char:
             c = key.char.lower()
             if c in string.ascii_lowercase:
-                freq = 200 + (ord(c) - 97) * 20
+                freq = BASE_FREQ + (ord(c) - ord('a')) * FREQ_STEP
                 with lock:
                     active_freqs.add(freq)
     except:
@@ -43,7 +45,7 @@ def on_release(key):
         if hasattr(key, "char") and key.char:
             c = key.char.lower()
             if c in string.ascii_lowercase:
-                freq = 200 + (ord(c) - 97) * 20
+                freq = BASE_FREQ + (ord(c) - ord('a')) * FREQ_STEP
                 with lock:
                     active_freqs.discard(freq)
     except:
@@ -60,7 +62,6 @@ with sd.OutputStream(
     channels=1,
     callback=audio_callback,
 ):
-    from pynput import keyboard
     with keyboard.Listener(
         on_press=on_press,
         on_release=on_release,

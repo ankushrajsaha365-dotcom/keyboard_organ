@@ -1,0 +1,87 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Polyphonic Organ</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            text-align: center;
+        }
+
+        .key {
+            display: inline-block;
+            width: 50px;
+            height: 200px;
+            border: 1px solid black;
+            background-color: white;
+            cursor: pointer;
+        }
+
+        .key.active {
+            background-color: #ccc;
+        }
+    </style>
+</head>
+<body>
+    <h1>Polyphonic Organ</h1>
+    <p>Press keys on your keyboard to play notes.</p>
+
+    <script>
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+        const notes = {
+            'a': 261.63, // C4
+            's': 293.66, // D4
+            'd': 329.63, // E4
+            'f': 349.23, // F4
+            'g': 392.00, // G4
+            'h': 440.00, // A4
+            'j': 493.88, // B4
+            'k': 523.25, // C5
+        };
+
+        const activeOscillators = {};
+
+        function playNote(note) {
+            if (!activeOscillators[note]) {
+                const oscillator = audioContext.createOscillator();
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(notes[note], audioContext.currentTime);
+                oscillator.connect(audioContext.destination);
+                oscillator.start();
+                activeOscillators[note] = oscillator;
+            }
+        }
+
+        function stopNote(note) {
+            if (activeOscillators[note]) {
+                activeOscillators[note].stop();
+                delete activeOscillators[note];
+            }
+        }
+
+        document.addEventListener('keydown', (event) => {
+            const key = event.key.toLowerCase();
+            if (notes[key]) {
+                playNote(key);
+                const keyElement = document.querySelector(`.key[data-key="${key}"]`);
+                if (keyElement) {
+                    keyElement.classList.add('active');
+                }
+            }
+        });
+
+        document.addEventListener('keyup', (event) => {
+            const key = event.key.toLowerCase();
+            if (notes[key]) {
+                stopNote(key);
+                const keyElement = document.querySelector(`.key[data-key="${key}"]`);
+                if (keyElement) {
+                    keyElement.classList.remove('active');
+                }
+            }
+        });
+    </script>
+</body>
+</html>
